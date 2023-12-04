@@ -173,6 +173,16 @@ public class Grid {
         updateLocations();
     }
 
+    //Helper method to hit a ship, used by shoot(int, int)
+    private void hitShip(String shipName, ArrayList<Integer> shipList, Integer coordinate) {
+        shipList.remove(coordinate);
+        this.grid[((int) (coordinate / GRID_SIZE))][coordinate % GRID_SIZE] = HIT;
+        System.out.println("You hit a ship.");
+        if (shipList.size() == 0) {
+            System.out.println("You have sunk the enemy's " + shipName + "!");
+        }
+    }
+
     //Attempts to shoot a specific coordinate (returns true if valid shot, false otherwise)
     public boolean shoot(int rowIndex, int columnIndex) {
         //If the desired coordinate is out of bounds, return false
@@ -186,44 +196,19 @@ public class Grid {
         Integer coordinate = ((rowIndex * GRID_SIZE) + columnIndex);
         switch (characterAtCoordinate) {
             case CARRIER_CHAR:
-                carrierLocations.remove(coordinate);
-                this.grid[rowIndex][columnIndex] = HIT;
-                System.out.println("You hit a ship.");
-                if (carrierLocations.size() == 0) {
-                    System.out.println("You have sunk the enemy's Carrier!");
-                }
+                hitShip("Carrier", carrierLocations, coordinate);
                 break;
             case BATTLESHIP_CHAR:
-                battleshipLocations.remove(coordinate);
-                this.grid[rowIndex][columnIndex] = HIT;
-                System.out.println("YOU HIT A SHIP");
-                if (battleshipLocations.size() == 0) {
-                    System.out.println("You have sunk the enemy's Battleship!");
-                }
+                hitShip("Battleship", battleshipLocations, coordinate);
                 break;
             case CRUISER_CHAR:
-                cruiserLocations.remove(coordinate);
-                this.grid[rowIndex][columnIndex] = HIT;
-                System.out.println("You hit a ship.");
-                if (cruiserLocations.size() == 0) {
-                    System.out.println("You have sunk the enemy's Cruiser!");
-                }
+                hitShip("Cruiser", cruiserLocations, coordinate);
                 break;
             case SUBMARINE_CHAR:
-                submarineLocations.remove(coordinate);
-                this.grid[rowIndex][columnIndex] = HIT;
-                System.out.println("You hit a ship.");
-                if (submarineLocations.size() == 0) {
-                    System.out.println("You have sunk the enemy's Submarine!");
-                }
+                hitShip("Submarine", submarineLocations, coordinate);
                 break;
             case DESTROYER_CHAR:
-                destroyerLocations.remove(coordinate);
-                this.grid[rowIndex][columnIndex] = HIT;
-                System.out.println("You hit a ship.");
-                if (destroyerLocations.size() == 0) {
-                    System.out.println("You have sunk the enemy's Destroyer!");
-                }
+                hitShip("Destroyer", destroyerLocations, coordinate);
                 break;
             case WATER:
                 this.grid[rowIndex][columnIndex] = MISS;
@@ -251,4 +236,9 @@ public class Grid {
         return output;
     }
     
+    //Check to see if player is dead (doesn't have any ships alive)
+    public boolean isDead() {
+        return (carrierLocations.size() == 0 && battleshipLocations.size() == 0 && cruiserLocations.size() == 0 && submarineLocations.size() == 0 && destroyerLocations.size() == 0);
+    }
+
 }
