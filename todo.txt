@@ -2,7 +2,6 @@ BattleClient.java
     -connect() method
     -messageReceived() implementation
     -sourceClosed() implementation
-    -send() method
     *Need to send "username" field to server by utilizing the Connection Agent
     *Possibly more constuctor work
 
@@ -14,7 +13,6 @@ ConnectionAgent.java
     -isConnected() method {check for purpose}
     -close() method
     -run() method {includes threading I presume}
-    *Needs to update 'in' field {idk what}
 
 BattleServer.java
     *Constructor might need some work

@@ -19,36 +19,36 @@ public class BattleServer implements MessageListener {
     //ArrayList containing the connection agents
     private ArrayList<ConnectionAgent> agents;
 
-
-
     //Constructor
     public BattleServer(int port, int requestedGridSize) {
         //Create the server using socket stuff (TODO)
         try {
             this.serverSocket = new ServerSocket(port);
-            this.serverSocket.setSoTimeout(10000); //10s timeout
+            this.serverSocket.setSoTimeout(10000); //10s timeout TODO (FOR DEBUGGING)
             this.game = new Game(requestedGridSize);
             this.agents = new ArrayList<ConnectionAgent>();
 
             //While loop will break if server times out (10 seconds), causing program to proceed to catch statements
             while (true) {
-                Socket client = serverSocket.accept();
-                ConnectionAgent ca = new ConnectionAgent(client);
+                Socket server = serverSocket.accept();
+                ConnectionAgent ca = new ConnectionAgent(server);
+                ca.addMessageListener(this);
                 agents.add(ca);
-                ca.run();
-                
             }
         }
         catch (IOException e) {
             System.out.println("An I/O error has occured. Please try again.");
+            this.closeAllConnections();
             System.exit(1);
         }
         catch (IllegalArgumentException e) {
             System.out.println("The port number is invalid. Please try again");
+            this.closeAllConnections();
             System.exit(2);
         }
         catch (SecurityException e) {
             System.out.println("A security manager exists and is currently not allowing this operation.");
+            this.closeAllConnections();
             System.exit(3);
         }
     }
@@ -63,10 +63,17 @@ public class BattleServer implements MessageListener {
         System.out.println("Broadcast.");
     }
 
+    //Closes all connected agents
+    private void closeAllConnections() {
+        for (ConnectionAgent ca : this.agents) {
+            ca.close();
+        }
+    }
 
     //TODO Method 1 implemented from MessageListener
     public void messageReceived(String message, MessageSource source) {
         System.out.println("Message receieved.");
+        System.out.println(message);
     }
     //TODO Method 2 implemented from MessageListener
     public void sourceClosed(MessageSource source) {

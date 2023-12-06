@@ -23,7 +23,10 @@ public class ConnectionAgent extends MessageSource implements Runnable {
     public ConnectionAgent(Socket socket) {
         try {
             this.socket = socket;
+            this.in = new Scanner(socket.getInputStream());
             this.out = new PrintStream(socket.getOutputStream());
+            this.thread = new Thread(this);
+            this.thread.start();
         }
         catch (IOException e) {
             System.out.println("IOException encountered. Error trying to create an output stream from socket.");
@@ -47,12 +50,25 @@ public class ConnectionAgent extends MessageSource implements Runnable {
 
     //TODO method
     public void close() {
-
+        try {
+            this.in.close();
+            this.socket.close();
+            this.out.close();
+        }
+        catch (IOException e) {
+            System.out.println("IOException encountered. Error trying to create an output stream from socket.");
+            System.exit(1);
+        }
     }
 
     //TODO method
     public void run() {
         System.out.println("Starts the thread");
+        while (this.isConnected()) {
+            if (this.in.hasNextLine()) {
+                this.notifyReceipt(this.in.nextLine());
+            }
+        }
     }
 
 }

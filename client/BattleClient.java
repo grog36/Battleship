@@ -26,7 +26,7 @@ public class BattleClient extends MessageSource implements MessageListener {
             this.port = port;
             this.username = username;
             this.connection = new ConnectionAgent(new Socket(this.host, this.port));
-            this.connection.run();
+            this.send(this.username);
         }
         catch (UnknownHostException e) {
             System.out.println("Unknown host exception. No IP address was found. Please try again.");
@@ -59,6 +59,6 @@ public class BattleClient extends MessageSource implements MessageListener {
 
     //TODO method
     public void send(String message) {
-
+        this.connection.sendMessage(message + "\n");
     }
 }
