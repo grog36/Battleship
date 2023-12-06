@@ -1,7 +1,8 @@
 package server;
-import java.util.Random;
+
 import java.lang.ArrayIndexOutOfBoundsException;
 import java.util.ArrayList;
+import java.util.Random;
 
 public class Grid {
     //The desired grid size (usually 10)
@@ -40,7 +41,7 @@ public class Grid {
     private ArrayList<Integer> destroyerLocations = new ArrayList<Integer>();
     
     //Sets up the ships for the game
-    private void setupShips() {
+    private void setupShips(int shipCount) {
         //Sets up the possible directions
         String[] directions = {"Up", "Right", "Down", "Left"};
 
@@ -48,7 +49,7 @@ public class Grid {
         Random randomizer = new Random();
 
         //For each ship (Carrier = 0, Battleship = 1, Cruiser = 2, Submarine = 3, Destroyer = 4)
-        for (int shipIndex = 0; shipIndex < 5; shipIndex++) {
+        for (int shipIndex = 0; shipIndex < shipCount; shipIndex++) {
             boolean isValidLocation = false; //Ensures the random spaces are valid to hold a ship
             
             while (!isValidLocation) {
@@ -175,7 +176,7 @@ public class Grid {
                 this.grid[i][j] = WATER;
             }
         }
-        setupShips();
+        setupShips(5); //TODO (5 is default, needs to be able to be changed)
         updateLocations();
     }
 

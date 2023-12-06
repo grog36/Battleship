@@ -1,10 +1,12 @@
 package server;
+
+import common.ConnectionAgent;
 import common.MessageListener;
 import common.MessageSource;
-import common.ConnectionAgent;
+
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.io.IOException;
 import java.util.ArrayList;
 
 public class BattleServer implements MessageListener {
@@ -14,8 +16,8 @@ public class BattleServer implements MessageListener {
     private int current;
     //The game
     private Game game;
-    //ArrayList containing the message listeners
-    private ArrayList<MessageListener> listeners;
+    //ArrayList containing the connection agents
+    private ArrayList<ConnectionAgent> agents;
 
 
 
@@ -26,11 +28,14 @@ public class BattleServer implements MessageListener {
             this.serverSocket = new ServerSocket(port);
             this.serverSocket.setSoTimeout(10000); //10s timeout
             this.game = new Game(requestedGridSize);
-            this.listeners = new ArrayList<MessageListener>();
+            this.agents = new ArrayList<ConnectionAgent>();
 
             //While loop will break if server times out (10 seconds), causing program to proceed to catch statements
             while (true) {
-                Socket server = serverSocket.accept();
+                Socket client = serverSocket.accept();
+                ConnectionAgent ca = new ConnectionAgent(client);
+                agents.add(ca);
+                ca.run();
                 
             }
         }

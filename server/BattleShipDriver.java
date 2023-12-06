@@ -30,7 +30,7 @@ public class BattleShipDriver {
     }
     public static void printUsageMessage() {
         System.out.println("Invalid Usage!");
-        System.out.println("Usage: java server.BattleShipDriver <port number> |grid size| ");
+        System.out.println("Usage: java server.BattleShipDriver <portnumber> |gridsize| ");
         System.out.println("Example: java server.BattleShipDriver 6767 10");
     }
 }

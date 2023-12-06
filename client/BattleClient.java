@@ -1,8 +1,12 @@
 package client;
 
-import common.MessageSource;
+import common.ConnectionAgent;
 import common.MessageListener;
+import common.MessageSource;
+
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class BattleClient extends MessageSource implements MessageListener {
@@ -12,6 +16,8 @@ public class BattleClient extends MessageSource implements MessageListener {
     private int port;
     //Username
     private String username;
+    //Connection Agent
+    private ConnectionAgent connection;
 
     //Constructor TODO ?
     public BattleClient(String hostname, int port, String username) {
@@ -19,6 +25,8 @@ public class BattleClient extends MessageSource implements MessageListener {
             this.host = InetAddress.getByName(hostname);
             this.port = port;
             this.username = username;
+            this.connection = new ConnectionAgent(new Socket(this.host, this.port));
+            this.connection.run();
         }
         catch (UnknownHostException e) {
             System.out.println("Unknown host exception. No IP address was found. Please try again.");
@@ -27,6 +35,10 @@ public class BattleClient extends MessageSource implements MessageListener {
         catch (SecurityException e) {
             System.out.println("Security Exception. A security manager exists and operation is not permitted.");
             System.exit(2);
+        }
+        catch (IOException e) {
+            System.out.println("An I/O error has occured. Please try again.");
+            System.exit(3);
         }
     }
 

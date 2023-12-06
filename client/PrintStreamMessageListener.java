@@ -1,9 +1,9 @@
 package client;
 
-import java.io.PrintStream;
-
 import common.MessageListener;
 import common.MessageSource;
+
+import java.io.PrintStream;
 
 public class PrintStreamMessageListener implements MessageListener {
 
