@@ -1,3 +1,4 @@
+package server;
 import java.util.Random;
 import java.lang.ArrayIndexOutOfBoundsException;
 import java.util.ArrayList;
@@ -5,6 +6,9 @@ import java.util.ArrayList;
 public class Grid {
     //The desired grid size (usually 10)
     private final int GRID_SIZE = 10;
+
+    //The player name associated with this grid
+    private String playerName;
 
     //Sizes of the ships
     private final int CARRIER_SIZE = 5;
@@ -162,8 +166,9 @@ public class Grid {
     }
 
     //Constructor to setup the grid using private methods
-    public Grid() {
+    public Grid(String playerName) {
         this.grid = new char[GRID_SIZE][GRID_SIZE];
+        this.playerName = playerName;
         for (int i = 0; i < GRID_SIZE; i++) {
             for (int j = 0; j < GRID_SIZE; j++) {
                 this.grid[i][j] = WATER;
@@ -241,4 +246,8 @@ public class Grid {
         return (carrierLocations.size() == 0 && battleshipLocations.size() == 0 && cruiserLocations.size() == 0 && submarineLocations.size() == 0 && destroyerLocations.size() == 0);
     }
 
+    //Get player name
+    public String getPlayer() {
+        return this.playerName;
+    }
 }

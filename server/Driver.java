@@ -1,8 +1,9 @@
+package server;
 import java.util.Scanner;
 
 public class Driver {
     public static void main(String[] args) {
-        Grid test = new Grid();
+        Grid test = new Grid("grog");
         System.out.println(test.toString());
         
         //Request coordinate to shoot
