@@ -1,8 +1,11 @@
 package server;
 import common.MessageListener;
 import common.MessageSource;
+import common.ConnectionAgent;
 import java.net.ServerSocket;
+import java.net.Socket;
 import java.io.IOException;
+import java.util.ArrayList;
 
 public class BattleServer implements MessageListener {
     //Server socket for the game
@@ -11,15 +14,25 @@ public class BattleServer implements MessageListener {
     private int current;
     //The game
     private Game game;
+    //ArrayList containing the message listeners
+    private ArrayList<MessageListener> listeners;
 
 
 
     //Constructor
-    public BattleServer(int port) {
+    public BattleServer(int port, int requestedGridSize) {
         //Create the server using socket stuff (TODO)
         try {
             this.serverSocket = new ServerSocket(port);
             this.serverSocket.setSoTimeout(10000); //10s timeout
+            this.game = new Game(requestedGridSize);
+            this.listeners = new ArrayList<MessageListener>();
+
+            //While loop will break if server times out (10 seconds), causing program to proceed to catch statements
+            while (true) {
+                Socket server = serverSocket.accept();
+                
+            }
         }
         catch (IOException e) {
             System.out.println("An I/O error has occured. Please try again.");

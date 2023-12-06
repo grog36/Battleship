@@ -5,7 +5,7 @@ import java.util.ArrayList;
 
 public class Grid {
     //The desired grid size (usually 10)
-    private final int GRID_SIZE = 10;
+    private int gridSize;
 
     //The player name associated with this grid
     private String playerName;
@@ -53,9 +53,9 @@ public class Grid {
             
             while (!isValidLocation) {
                 String direction = directions[randomizer.nextInt(directions.length)];
-                int randomCoordinate = randomizer.nextInt(GRID_SIZE * GRID_SIZE);
-                int rowIndex = (int) (randomCoordinate / GRID_SIZE);
-                int columnIndex = randomCoordinate % GRID_SIZE;
+                int randomCoordinate = randomizer.nextInt(this.gridSize * this.gridSize);
+                int rowIndex = (int) (randomCoordinate / this.gridSize);
+                int columnIndex = randomCoordinate % this.gridSize;
     
                 boolean squareNotBlank = false;
                 switch (direction) {
@@ -142,23 +142,23 @@ public class Grid {
 
     //Adds the ship locations to the corresponding array list
     private void updateLocations() {
-        for (int rowIndex = 0; rowIndex < GRID_SIZE; rowIndex++) {
-            for (int colIndex = 0; colIndex < GRID_SIZE; colIndex++) {
+        for (int rowIndex = 0; rowIndex < this.gridSize; rowIndex++) {
+            for (int colIndex = 0; colIndex < this.gridSize; colIndex++) {
                 switch (this.grid[rowIndex][colIndex]) {
                     case CARRIER_CHAR:
-                        carrierLocations.add((rowIndex * GRID_SIZE) + colIndex);
+                        carrierLocations.add((rowIndex * this.gridSize) + colIndex);
                         break;
                     case BATTLESHIP_CHAR:
-                        battleshipLocations.add((rowIndex * GRID_SIZE) + colIndex);
+                        battleshipLocations.add((rowIndex * this.gridSize) + colIndex);
                         break;
                     case CRUISER_CHAR:
-                        cruiserLocations.add((rowIndex * GRID_SIZE) + colIndex);
+                        cruiserLocations.add((rowIndex * this.gridSize) + colIndex);
                         break;
                     case SUBMARINE_CHAR:
-                        submarineLocations.add((rowIndex * GRID_SIZE) + colIndex);
+                        submarineLocations.add((rowIndex * this.gridSize) + colIndex);
                         break;
                     case DESTROYER_CHAR:
-                        destroyerLocations.add((rowIndex * GRID_SIZE) + colIndex);
+                        destroyerLocations.add((rowIndex * this.gridSize) + colIndex);
                         break;
                 }
             }
@@ -166,11 +166,12 @@ public class Grid {
     }
 
     //Constructor to setup the grid using private methods
-    public Grid(String playerName) {
-        this.grid = new char[GRID_SIZE][GRID_SIZE];
+    public Grid(String playerName, int requestedGridSize) {
+        this.gridSize = requestedGridSize;
+        this.grid = new char[this.gridSize][this.gridSize];
         this.playerName = playerName;
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
+        for (int i = 0; i < this.gridSize; i++) {
+            for (int j = 0; j < this.gridSize; j++) {
                 this.grid[i][j] = WATER;
             }
         }
@@ -178,10 +179,15 @@ public class Grid {
         updateLocations();
     }
 
+    //Constructor for just player name
+    public Grid(String playerName) {
+        this(playerName, 10); //Default grid size is 10
+    }
+
     //Helper method to hit a ship, used by shoot(int, int)
     private void hitShip(String shipName, ArrayList<Integer> shipList, Integer coordinate) {
         shipList.remove(coordinate);
-        this.grid[((int) (coordinate / GRID_SIZE))][coordinate % GRID_SIZE] = HIT;
+        this.grid[((int) (coordinate / this.gridSize))][coordinate % this.gridSize] = HIT;
         System.out.println("You hit a ship.");
         if (shipList.size() == 0) {
             System.out.println("You have sunk the enemy's " + shipName + "!");
@@ -191,14 +197,14 @@ public class Grid {
     //Attempts to shoot a specific coordinate (returns true if valid shot, false otherwise)
     public boolean shoot(int rowIndex, int columnIndex) {
         //If the desired coordinate is out of bounds, return false
-        if (rowIndex < 0 || rowIndex >= GRID_SIZE || columnIndex < 0 || columnIndex >= GRID_SIZE) {
+        if (rowIndex < 0 || rowIndex >= this.gridSize || columnIndex < 0 || columnIndex >= this.gridSize) {
             return false;
         }
         
         //Checks to see if it is a valid shot and shoots if it is
         boolean wasValidShot = true;
         char characterAtCoordinate = this.grid[rowIndex][columnIndex];
-        Integer coordinate = ((rowIndex * GRID_SIZE) + columnIndex);
+        Integer coordinate = ((rowIndex * this.gridSize) + columnIndex);
         switch (characterAtCoordinate) {
             case CARRIER_CHAR:
                 hitShip("Carrier", carrierLocations, coordinate);
@@ -230,10 +236,28 @@ public class Grid {
     //To string function (displays the grid)
     public String toString() {
         String output = "";
-        for (int i = 0; i < GRID_SIZE; i++) {
-            for (int j = 0; j < GRID_SIZE; j++) {
+        for (int i = 0; i < this.gridSize; i++) {
+            for (int j = 0; j < this.gridSize; j++) {
                 output += "[";
                 output += this.grid[i][j];
+                output += "]";
+            }
+            output += "\n";
+        }
+        return output;
+    }
+
+    public String getEnemyPov() {
+        String output = "";
+        for (int i = 0; i < this.gridSize; i++) {
+            for (int j = 0; j < this.gridSize; j++) {
+                output += "[";
+                if (this.grid[i][j] == MISS || this.grid[i][j] == HIT) {
+                    output += this.grid[i][j];
+                }
+                else {
+                    output += WATER;
+                }
                 output += "]";
             }
             output += "\n";

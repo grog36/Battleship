@@ -5,13 +5,17 @@ public class Game {
     //Array list for the games
     private ArrayList<Grid> grids;
 
+    //Grid size
+    private int gridSize;
+
     //Constructor (no args)
-    public Game() {
+    public Game(int requestedGridSize) {
+        this.gridSize = requestedGridSize;
         this.grids = new ArrayList<Grid>();
     }
 
     public void addPlayer(String playerName) {
-        this.grids.add(new Grid(playerName));
+        this.grids.add(new Grid(playerName, this.gridSize));
     }
 
     /**
