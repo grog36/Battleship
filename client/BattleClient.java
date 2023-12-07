@@ -10,16 +10,26 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 
 public class BattleClient extends MessageSource implements MessageListener {
-    //Host
+    //InetAddress for the socket
     private InetAddress host;
-    //Port
+
+    //Port number for the socket
     private int port;
-    //Username
+
+    //Username for the player who owns this client
     private String username;
-    //Connection Agent
+
+    //Connection Agent to contain the connection
     private ConnectionAgent connection;
 
-    //Constructor TODO ?
+
+    /**
+     * Constructor
+     * 
+     * @param hostname The hostname to connect to
+     * @param port The port number to connect to
+     * @param username The username to set for this user
+     */
     public BattleClient(String hostname, int port, String username) {
         try {
             this.host = InetAddress.getByName(hostname);
@@ -36,11 +46,14 @@ public class BattleClient extends MessageSource implements MessageListener {
         }
     }
 
-    //TODO method
+    /**
+     * Connects to the previously setup socket
+     */
     public void connect() {
         try {
             this.connection = new ConnectionAgent(new Socket(this.host, this.port));
             this.connection.addMessageListener(this);
+            //Sends a first time message to the server containing the requested username for the player
             this.send("Username Creation: " + this.username);
         }
         catch (IOException e) {
@@ -49,6 +62,11 @@ public class BattleClient extends MessageSource implements MessageListener {
         }
     }
 
+    /**
+     * Checks to see if the client is connected to the server
+     * 
+     * @return Returns true if the client is connected to the server, false otherwise
+     */
     public boolean isConnected() {
         return this.connection.isConnected();
     }
@@ -80,6 +98,11 @@ public class BattleClient extends MessageSource implements MessageListener {
         source.removeMessageListener(this);
     }
 
+    /**
+     * Sends a message to the server
+     * 
+     * @param message The message you wish to send to the server
+     */
     public void send(String message) {
         this.connection.sendMessage(message + "\n");
     }

@@ -40,7 +40,11 @@ public class Grid {
     private ArrayList<Integer> submarineLocations = new ArrayList<Integer>();
     private ArrayList<Integer> destroyerLocations = new ArrayList<Integer>();
     
-    //Sets up the ships for the game
+    /**
+     * Helper method to setup the ships
+     * 
+     * @param shipCount How many ships each player should have (1 - 5)
+     */
     private void setupShips(int shipCount) {
         //Sets up the possible directions
         String[] directions = {"Up", "Right", "Down", "Left"};
@@ -141,7 +145,9 @@ public class Grid {
         }
     }
 
-    //Adds the ship locations to the corresponding array list
+    /**
+     * Helper method to update the ship locations within their respective ArrayList field
+     */
     private void updateLocations() {
         for (int rowIndex = 0; rowIndex < this.gridSize; rowIndex++) {
             for (int colIndex = 0; colIndex < this.gridSize; colIndex++) {
@@ -166,7 +172,12 @@ public class Grid {
         }
     }
 
-    //Constructor to setup the grid using private methods
+    /**
+     * Constructor
+     * 
+     * @param playerName The name of the player who owns this grid
+     * @param requestedGridSize The requested size of the grid
+     */
     public Grid(String playerName, int requestedGridSize) {
         this.gridSize = requestedGridSize;
         this.grid = new char[this.gridSize][this.gridSize];
@@ -180,18 +191,34 @@ public class Grid {
         updateLocations();
     }
 
-    //Constructor for just player name
+    /**
+     * Constructor (defaults to grid size of 10)
+     * 
+     * @param playerName The name of the player who owns this grid
+     */
     public Grid(String playerName) {
         this(playerName, 10); //Default grid size is 10
     }
 
-    //Helper method to hit a ship, used by shoot(int, int)
+    /**
+     * Helper method used to hit a ship
+     * 
+     * @param shipName The name of the ship to shoot
+     * @param shipList The ArrayList containing the coordinates for the given ship
+     * @param coordinate The coordinate to shoot the ship on
+     */
     private void hitShip(String shipName, ArrayList<Integer> shipList, Integer coordinate) {
         shipList.remove(coordinate);
         this.grid[((int) (coordinate / this.gridSize))][coordinate % this.gridSize] = HIT;
     }
 
-    //Attempts to shoot a specific coordinate (returns true if valid shot, false otherwise)
+    /**
+     * Shoots a specific square
+     * 
+     * @param rowIndex The row index of the square you wish to shoot
+     * @param columnIndex The column index of the square you wish to shoot
+     * @return Returns true if the shot was successful, false otherwise
+     */
     public boolean shoot(int rowIndex, int columnIndex) {
         //If the desired coordinate is out of bounds, return false
         if (rowIndex < 0 || rowIndex >= this.gridSize || columnIndex < 0 || columnIndex >= this.gridSize) {
@@ -228,7 +255,12 @@ public class Grid {
         return wasValidShot;
     }   
 
-    //To string function (displays the grid) Very scuffed but works
+    /**
+     * To string method to display the grid containing the ships
+     * It's a little bit scuffed, but it displays it neatly!
+     * 
+     * @return The string representation of the grid
+     */
     public String toString() {
         String output = " ";
         for (int i = 0; i < this.gridSize; i++) {
@@ -256,6 +288,12 @@ public class Grid {
         return output;
     }
 
+    /**
+     * To string method to display the grid containing the ships from the enemy's POV (no boat locations)
+     * It's a little bit scuffed, but it displays it neatly!
+     * 
+     * @return The string representation of the grid from the enemy's POV
+     */
     public String getEnemyPov() {
         String output = " ";
         for (int i = 0; i < this.gridSize; i++) {
@@ -290,12 +328,20 @@ public class Grid {
         return output;
     }
     
-    //Check to see if player is dead (doesn't have any ships alive)
+    /**
+     * Check whether or not the player is dead (no ships alive)
+     * 
+     * @return True if player is dead, false if there is still a ship alive with at least 1 coordinate
+     */
     public boolean isDead() {
         return (carrierLocations.size() == 0 && battleshipLocations.size() == 0 && cruiserLocations.size() == 0 && submarineLocations.size() == 0 && destroyerLocations.size() == 0);
     }
 
-    //Get player name
+    /**
+     * Getter method to get the name of the player who owns the grid
+     * 
+     * @return The player who owns the grid
+     */
     public String getPlayer() {
         return this.playerName;
     }

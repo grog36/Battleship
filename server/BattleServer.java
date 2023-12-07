@@ -7,34 +7,47 @@ import common.MessageSource;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.SocketException;
 import java.util.ArrayList;
 
 public class BattleServer implements MessageListener {
     //Server socket for the game
     private ServerSocket serverSocket;
-    //Current??? (TODO): WHAT IS THIS
+
+    //The index of the player whose turn it is
     private int current;
+
     //Is game in session?
     private boolean gameInSession = false;
+
     //The game
     private Game game;
+
     //ArrayList containing the connection agents
     private ArrayList<ConnectionAgent> agents;
+
     //ArrayList containing the names of all of the players of the current game
     private ArrayList<String> playerNames;
+
     //ArrayList containing the alive players of the current game
     private ArrayList<String> alivePlayers;
 
-    //Constructor
+
+
+    /**
+     * Constructor
+     * 
+     * @param port The port to open up the socket on
+     * @param requestedGridSize The requested grid size for the game
+     */
     public BattleServer(int port, int requestedGridSize) {
-        //Create the server using socket stuff (TODO)
+        //Create the server
         try {
             this.serverSocket = new ServerSocket(port);
             this.game = new Game(requestedGridSize);
             this.agents = new ArrayList<ConnectionAgent>();
             this.playerNames = new ArrayList<String>();
             //While loop will break when everyone has left the game or after the 15s auto-timeout when server is started
+            //Users leave the game by typing '/end'
             while (true) {
                 //If there are no users connected, the server will auto-timeout in 15s
                 if (this.agents.size() == 0) {
@@ -66,11 +79,6 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    //No idea what this method is supposed to do yet (TODO)
-    public void listen() {
-        System.out.println("Listen.");
-    }
-
     /**
      * Sends a message to all connected users
      * 
@@ -82,7 +90,9 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    //Closes all connected agents
+    /**
+     * Helper method to close all of the ConnectionAgent connections
+     */
     private void closeAllConnections() {
         this.broadcast("Goodbye.");
         for (ConnectionAgent ca : this.agents) {
@@ -96,7 +106,9 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    //Starts the game
+    /**
+     * Helper method to start the game
+     */
     private void startGame() {
         this.gameInSession = true;
         this.broadcast("The game begins");
@@ -105,9 +117,11 @@ public class BattleServer implements MessageListener {
         this.broadcast(this.playerNames.get(this.current) + " it is your turn");
     }
 
-    //Checks to see if there is a winner
+    /**
+     * Helper method to check if there is a last player alive
+     */
     private void checkForWin() {
-        if (this.alivePlayers.size() == 0) {
+        if (this.alivePlayers.size() == 1) {
             this.gameInSession = false;
             this.broadcast("GAME OVER: " + this.alivePlayers.get(0) + " wins!");
         }
@@ -172,7 +186,7 @@ public class BattleServer implements MessageListener {
         }
     }
 
-    /** TODO
+    /**
      * Used to notify observers that the subject has receieved a message.
      * 
      * @param message The message received by the subject
@@ -209,7 +223,7 @@ public class BattleServer implements MessageListener {
             }
         }
         else if (message.equals("/start")) {
-            if (this.playerNames.size() > 0) {
+            if (this.playerNames.size() > 1) {
                 this.startGame();
             }
             else {
@@ -244,8 +258,10 @@ public class BattleServer implements MessageListener {
                 }
             }
             this.broadcast("!!! " + this.playerNames.get(indexToRemove) + " surrendered");
+            this.sendMessageToSource("Goodbye.", source);
             this.agents.remove(indexToRemove);
             this.playerNames.remove(indexToRemove);
+            this.checkForWin();
             if (this.agents.size() == 0) {
                 System.out.println("All players have left. Server will be shutdown.");
                 this.closeAllConnections();
@@ -253,6 +269,7 @@ public class BattleServer implements MessageListener {
             }
         }
         else {
+            //If it doesn't fall under any category/command, just print it to the server's console
             System.out.println(message);
         }
     }

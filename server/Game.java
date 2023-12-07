@@ -9,12 +9,21 @@ public class Game {
     //Grid size
     private int gridSize;
 
-    //Constructor (no args)
+    /**
+     * Constructor
+     * 
+     * @param requestedGridSize The grid size you wish to use
+     */
     public Game(int requestedGridSize) {
         this.gridSize = requestedGridSize;
         this.grids = new ArrayList<Grid>();
     }
 
+    /**
+     * Adds a player to the game (creates a grid for them)
+     * 
+     * @param playerName The name of the player you wish to add to the game
+     */
     public void addPlayer(String playerName) {
         this.grids.add(new Grid(playerName, this.gridSize));
     }
@@ -32,5 +41,4 @@ public class Game {
         }
         return null;
     }
-    
 }

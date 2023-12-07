@@ -6,20 +6,24 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class ConnectionAgent extends MessageSource implements Runnable {
-    //Socket
+    //The socket containing the connection
     private Socket socket;
 
-    //Scanner
+    //The Scanner containing the input for the socket
     private Scanner in;
 
-    //PrintStream
+    //The PrintStream containing the output for the socket
     private PrintStream out;
 
-    //Thread
+    //The thread that the process runs on
     private Thread thread;
 
 
-    // TODO CONSTRUCTOR
+    /**
+     * Constructor
+     * 
+     * @param socket The socket containing the connection
+     */
     public ConnectionAgent(Socket socket) {
         try {
             this.socket = socket;
@@ -43,13 +47,18 @@ public class ConnectionAgent extends MessageSource implements Runnable {
         this.out.print(message + "\n");
     }
 
-    //TODO method (Maybe this is the purpose?)
+    /**
+     * Returns whether the current socket is connected (not closed)
+     * 
+     * @return Returns whether the current socket is connected (not closed)
+     */
     public boolean isConnected() {
-        //System.out.println(this.socket.isClosed() + "\t" + this.socket.isConnected());
         return !(this.socket.isClosed());
     }
 
-    //TODO method
+    /**
+     * Closes all sockets and streams
+     */
     public void close() {
         try {
             this.socket.close();
@@ -62,14 +71,14 @@ public class ConnectionAgent extends MessageSource implements Runnable {
         }
     }
 
-    //TODO method
+    /**
+     * Runs this process as a thread
+     */
     public void run() {
-        System.out.println("Starts the thread");
         while (this.isConnected()) {
             if (this.in.hasNextLine()) {
                 this.notifyReceipt(this.in.nextLine());
             }
         }
     }
-
 }

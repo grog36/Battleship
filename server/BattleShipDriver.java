@@ -7,7 +7,6 @@ public class BattleShipDriver {
             try {
                 int portNumber = Integer.parseInt(args[0]);
                 BattleServer bs = new BattleServer(portNumber, DEFAULT_GRID_SIZE);
-                bs.listen();
             }
             catch (NumberFormatException e) {
                 printUsageMessage();
@@ -17,8 +16,7 @@ public class BattleShipDriver {
             try {
                 int portNumber = Integer.parseInt(args[0]);
                 int gridSize = Integer.parseInt(args[1]);
-                BattleServer bs = new BattleServer(portNumber, gridSize);   
-                bs.listen();
+                BattleServer bs = new BattleServer(portNumber, gridSize);
             }
             catch (NumberFormatException e) {
                 printUsageMessage();
@@ -28,6 +26,10 @@ public class BattleShipDriver {
             printUsageMessage();
         }
     }
+
+    /**
+     * Helper method to print the usage message for this driver
+     */
     public static void printUsageMessage() {
         System.out.println("Invalid Usage!");
         System.out.println("Usage: java server.BattleShipDriver <portnumber> |gridsize| ");

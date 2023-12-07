@@ -10,7 +10,11 @@ public class PrintStreamMessageListener implements MessageListener {
     //OutputStream
     private PrintStream out;
 
-    //Constructor (TODO)
+    /**
+     * Constructor
+     * 
+     * @param out The Printstream to use as an output
+     */
     public PrintStreamMessageListener(PrintStream out) {
         this.out = out;
     }
