@@ -26,8 +26,13 @@ public class PrintStreamMessageListener implements MessageListener {
         this.out.print(message);
     }
     
-    //TODO Method 2 implemented from MessageListener
+    /**
+     * Used to notify observers that the subject will not receive new messages; observers can
+     * deregister themselves.
+     * 
+     * @param source The <code>MessageSource</code> that does not expect more messages.
+     */
     public void sourceClosed(MessageSource source) {
-        System.out.println("Source closed.");
+        source.removeMessageListener(this);
     }
 }

@@ -24,16 +24,17 @@ public class BattleServer implements MessageListener {
         //Create the server using socket stuff (TODO)
         try {
             this.serverSocket = new ServerSocket(port);
-            this.serverSocket.setSoTimeout(10000); //10s timeout TODO (FOR DEBUGGING)
+            this.serverSocket.setSoTimeout(5000); //5s timeout TODO (FOR DEBUGGING)
             this.game = new Game(requestedGridSize);
             this.agents = new ArrayList<ConnectionAgent>();
 
-            //While loop will break if server times out (10 seconds), causing program to proceed to catch statements
+            //While loop will break if server times out (5 seconds), causing program to proceed to catch statements
             while (true) {
                 Socket server = serverSocket.accept();
                 ConnectionAgent ca = new ConnectionAgent(server);
                 ca.addMessageListener(this);
                 agents.add(ca);
+                ca.sendMessage("Goodbye.");
             }
         }
         catch (IOException e) {
@@ -68,15 +69,32 @@ public class BattleServer implements MessageListener {
         for (ConnectionAgent ca : this.agents) {
             ca.close();
         }
+        try {
+            this.serverSocket.close();
+        }
+        catch (IOException e) {
+            System.out.println("An I/O error has occured. Please try again.");
+        }
     }
 
-    //TODO Method 1 implemented from MessageListener
+    /** TODO
+     * Used to notify observers that the subject has receieved a message.
+     * 
+     * @param message The message received by the subject
+     * @param source The source from which this message originated (if needed).
+     */
     public void messageReceived(String message, MessageSource source) {
         System.out.println("Message receieved.");
         System.out.println(message);
     }
-    //TODO Method 2 implemented from MessageListener
+
+    /**
+     * Used to notify observers that the subject will not receive new messages; observers can
+     * deregister themselves.
+     * 
+     * @param source The <code>MessageSource</code> that does not expect more messages.
+     */
     public void sourceClosed(MessageSource source) {
-        System.out.println("Source closed.");
+        source.removeMessageListener(this);
     }
 }

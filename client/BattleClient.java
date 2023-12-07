@@ -25,8 +25,6 @@ public class BattleClient extends MessageSource implements MessageListener {
             this.host = InetAddress.getByName(hostname);
             this.port = port;
             this.username = username;
-            this.connection = new ConnectionAgent(new Socket(this.host, this.port));
-            this.send(this.username);
         }
         catch (UnknownHostException e) {
             System.out.println("Unknown host exception. No IP address was found. Please try again.");
@@ -36,28 +34,52 @@ public class BattleClient extends MessageSource implements MessageListener {
             System.out.println("Security Exception. A security manager exists and operation is not permitted.");
             System.exit(2);
         }
+    }
+
+    //TODO method
+    public void connect() {
+        try {
+            this.connection = new ConnectionAgent(new Socket(this.host, this.port));
+            this.connection.addMessageListener(this);
+            this.send(this.username);
+        }
         catch (IOException e) {
             System.out.println("An I/O error has occured. Please try again.");
             System.exit(3);
         }
     }
 
-    //TODO method
-    public void connect() {
-
+    public boolean isConnected() {
+        return this.connection.isConnected();
     }
 
-    //TODO Method 1 implemented from MessageListener
+    /**
+     * Used to notify observers that the subject has receieved a message.
+     * 
+     * @param message The message received by the subject
+     * @param source The source from which this message originated (if needed).
+     */
     public void messageReceived(String message, MessageSource source) {
-        System.out.println("Message receieved.");
+        //If the message is "Goodbye.", the connection has been closed by the server
+        if (message.equals("Goodbye.")) {
+            this.connection.close();
+            System.out.println("Connection to the server has been closed. Please press enter to quit.");
+        }
+        else {
+            System.out.println(message);
+        }
     }
 
-    //TODO Method 2 implemented from MessageListener
+    /**
+     * Used to notify observers that the subject will not receive new messages; observers can
+     * deregister themselves.
+     * 
+     * @param source The <code>MessageSource</code> that does not expect more messages.
+     */
     public void sourceClosed(MessageSource source) {
-        System.out.println("Source closed.");
+        source.removeMessageListener(this);
     }
 
-    //TODO method
     public void send(String message) {
         this.connection.sendMessage(message + "\n");
     }

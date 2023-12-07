@@ -1,8 +1,5 @@
 BattleClient.java
     -connect() method
-    -messageReceived() implementation
-    -sourceClosed() implementation
-    *Need to send "username" field to server by utilizing the Connection Agent
     *Possibly more constuctor work
 
 BattleDriver.java

@@ -45,14 +45,15 @@ public class ConnectionAgent extends MessageSource implements Runnable {
 
     //TODO method (Maybe this is the purpose?)
     public boolean isConnected() {
-        return socket.isConnected();
+        //System.out.println(this.socket.isClosed() + "\t" + this.socket.isConnected());
+        return !(this.socket.isClosed());
     }
 
     //TODO method
     public void close() {
         try {
-            this.in.close();
             this.socket.close();
+            this.in.close();
             this.out.close();
         }
         catch (IOException e) {
