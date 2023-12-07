@@ -40,7 +40,7 @@ public class ConnectionAgent extends MessageSource implements Runnable {
      * @param message The message to be sent to out (PrintStream)
      */
     public void sendMessage(String message) {
-        this.out.print(message);
+        this.out.print(message + "\n");
     }
 
     //TODO method (Maybe this is the purpose?)

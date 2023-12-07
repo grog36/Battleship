@@ -41,7 +41,7 @@ public class BattleClient extends MessageSource implements MessageListener {
         try {
             this.connection = new ConnectionAgent(new Socket(this.host, this.port));
             this.connection.addMessageListener(this);
-            this.send(this.username);
+            this.send("Username Creation: " + this.username);
         }
         catch (IOException e) {
             System.out.println("An I/O error has occured. Please try again.");

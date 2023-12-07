@@ -26,7 +26,7 @@ public class Game {
      */
     public Grid getGrid(String playerName) {
         for (Grid g : this.grids) {
-            if (g.getPlayer() == playerName) {
+            if (g.getPlayer().equals(playerName)) {
                 return g;
             }
         }
