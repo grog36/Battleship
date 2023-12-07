@@ -7,6 +7,7 @@ import common.MessageSource;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.net.SocketException;
 import java.util.ArrayList;
 
 public class BattleServer implements MessageListener {
@@ -14,30 +15,38 @@ public class BattleServer implements MessageListener {
     private ServerSocket serverSocket;
     //Current??? (TODO): WHAT IS THIS
     private int current;
+    //Is game in session?
+    private boolean gameInSession = false;
     //The game
     private Game game;
     //ArrayList containing the connection agents
     private ArrayList<ConnectionAgent> agents;
-    //ArrayList containing the names of the players
+    //ArrayList containing the names of all of the players of the current game
     private ArrayList<String> playerNames;
+    //ArrayList containing the alive players of the current game
+    private ArrayList<String> alivePlayers;
 
     //Constructor
     public BattleServer(int port, int requestedGridSize) {
         //Create the server using socket stuff (TODO)
         try {
             this.serverSocket = new ServerSocket(port);
-            this.serverSocket.setSoTimeout(5000); //5s timeout TODO (FOR DEBUGGING)
             this.game = new Game(requestedGridSize);
             this.agents = new ArrayList<ConnectionAgent>();
             this.playerNames = new ArrayList<String>();
-
-            //While loop will break if server times out (5 seconds), causing program to proceed to catch statements
+            //While loop will break when everyone has left the game or after the 15s auto-timeout when server is started
             while (true) {
+                //If there are no users connected, the server will auto-timeout in 15s
+                if (this.agents.size() == 0) {
+                    this.serverSocket.setSoTimeout(15000);
+                }
+                else {
+                    this.serverSocket.setSoTimeout(0);
+                }
                 Socket server = serverSocket.accept();
                 ConnectionAgent ca = new ConnectionAgent(server);
                 ca.addMessageListener(this);
-                agents.add(ca);
-                //agents.add(new ConnectionAgent(new Socket()));
+                this.agents.add(ca);
             }
         }
         catch (IOException e) {
@@ -62,7 +71,11 @@ public class BattleServer implements MessageListener {
         System.out.println("Listen.");
     }
 
-    //No idea what this method is supposed to do yet (TODO)
+    /**
+     * Sends a message to all connected users
+     * 
+     * @param message The message to be sent to all users
+     */
     public void broadcast(String message) {
         for (ConnectionAgent ca : this.agents) {
             ca.sendMessage(message);
@@ -85,12 +98,72 @@ public class BattleServer implements MessageListener {
 
     //Starts the game
     private void startGame() {
-        this.broadcast("Starting game. Please be patient...");
+        this.gameInSession = true;
+        this.broadcast("The game begins");
+        this.alivePlayers = new ArrayList<String>(this.playerNames);
+        this.current = 0;
+        this.broadcast(this.playerNames.get(this.current) + " it is your turn");
     }
 
+    //Checks to see if there is a winner
+    private void checkForWin() {
+        if (this.alivePlayers.size() == 0) {
+            this.gameInSession = false;
+            this.broadcast("GAME OVER: " + this.alivePlayers.get(0) + " wins!");
+        }
+    }
 
+    /**
+     * Method to attempt to shoot at a player
+     * 
+     * @param playerName The player the user wishes to shoot at
+     * @param rowIndex The row in which the player wishes to shoot at
+     * @param colIndex The column in which the player wishes to shoot at
+     * @param source The MessageSource of the user who wishes to shoot
+     */
+    private void fireAtPlayer(String playerName, int rowIndex, int colIndex, MessageSource source) {
+        if (this.agents.get(this.current).equals(source)) {
+            if (this.alivePlayers.contains(playerName)) {
+                if (this.game.getGrid(playerName).shoot(rowIndex, colIndex)) {
+                    this.broadcast("Shots fired at " + playerName + " by " + this.playerNames.get(current));
+                    this.checkForLife(playerName);
+                    //Change whose turn it is
+                    int currentIndex = this.alivePlayers.indexOf(this.playerNames.get(this.current));
+                    currentIndex++;
+                    if (currentIndex == this.alivePlayers.size()) {
+                        currentIndex = 0;
+                    }
+                    this.current = this.playerNames.indexOf(this.alivePlayers.get(currentIndex));
+                    this.broadcast(this.playerNames.get(this.current) + " it is your turn");
+                    this.checkForWin();
+                }
+                else {
+                    this.sendMessageToSource("Invalid coordinates. Please try again.", source);
+                }
+            }
+        }
+        else {
+            this.sendMessageToSource("It is not your turn", source);
+        }
+    }
 
-    //Sends a message to the desired source
+    /**
+     * Checks to see if a player is still alive and removes them from the arraylist if not
+     * 
+     * @param playerName The player you wish to check
+     */
+    private void checkForLife(String playerName) {
+        if (this.game.getGrid(playerName).isDead()) {
+            this.alivePlayers.remove(playerName);
+        }
+    }
+
+    /**
+     * Send a message to the desired message source
+     * 
+     * @param message The message to be sent
+     * @param source The MessageSource to send the message to
+     */
     private void sendMessageToSource(String message, MessageSource source) {
         for (ConnectionAgent ca : this.agents) {
             if (ca.equals(source)) {
@@ -99,9 +172,6 @@ public class BattleServer implements MessageListener {
         }
     }
 
-
-
-
     /** TODO
      * Used to notify observers that the subject has receieved a message.
      * 
@@ -109,31 +179,77 @@ public class BattleServer implements MessageListener {
      * @param source The source from which this message originated (if needed).
      */
     public void messageReceived(String message, MessageSource source) {
-        if (message.contains("Username Creation: ")) {
+        if (message.startsWith("Username Creation: ")) {
             String username = message.substring(19, (message.length()));
-            //TODO Add some logic so they can't join a game that is already in session
-            this.game.addPlayer(username);
-            this.playerNames.add(username);
-            System.out.println("!!! " + username + " has connected");
+            if (this.gameInSession) {
+                this.sendMessageToSource("Game is already in progress. Please try again later.", source);
+            }
+            else {
+                this.game.addPlayer(username);
+                this.playerNames.add(username);
+                System.out.println("!!! " + username + " has connected");
+            }
         }
         else if (message.contains("/map")) {
             try {
                 String player = message.substring(5, message.length());
-                //TODO Needs logic to send the correct board to the correct person
-                //I.E. Can't see where ships are when looking at another player's map
-                this.sendMessageToSource(this.game.getGrid(player).toString(), source);
+                for (int i = 0; i < this.agents.size(); i++) {
+                    if (this.agents.get(i).equals(source)) {
+                        if (player.equals(this.playerNames.get(i))) {
+                            this.sendMessageToSource(this.game.getGrid(player).toString(), source);
+                        }
+                        else {
+                            this.sendMessageToSource(this.game.getGrid(player).getEnemyPov(), source);
+                        }
+                    }
+                }
             }
             catch (StringIndexOutOfBoundsException e) {
-                //TODO Send usage message to source of request
+                this.sendMessageToSource("Improper '/map' usage. Correct Usage: /map <playerName>", source);
             }
         }
         else if (message.equals("/start")) {
-            if (this.playerNames.size() > 1) {
+            if (this.playerNames.size() > 0) {
                 this.startGame();
             }
             else {
-                //TODO Send message to player "Not enough players to start the game"
                 this.broadcast("Not enough players to start the game");
+            }
+        }
+        else if (message.startsWith("/fire")) {
+            if (this.gameInSession) {
+                String[] brokenMessage = message.split(" ");
+                try {
+                    String playerToShoot = brokenMessage[1];
+                    int rowIndex = Integer.parseInt(brokenMessage[2]);
+                    int colIndex = Integer.parseInt(brokenMessage[3]);
+                    this.fireAtPlayer(playerToShoot, rowIndex, colIndex, source);
+                }
+                catch (NumberFormatException e) {
+                    this.sendMessageToSource("Invalid coordinate. Please try again.", source);
+                }
+                catch (ArrayIndexOutOfBoundsException e) {
+                    this.sendMessageToSource("Improper '/fire' usage. Correct Usage: /fire <targetName> <rowIndex> <columnIndex>", source);
+                }
+            }
+            else {
+                this.sendMessageToSource("Game not in progress", source);
+            }
+        }
+        else if (message.equals("/end")) {
+            int indexToRemove = -1;
+            for (int i = 0; i < this.agents.size(); i++) {
+                if (this.agents.get(i).equals(source)) {
+                    indexToRemove = i;
+                }
+            }
+            this.broadcast("!!! " + this.playerNames.get(indexToRemove) + " surrendered");
+            this.agents.remove(indexToRemove);
+            this.playerNames.remove(indexToRemove);
+            if (this.agents.size() == 0) {
+                System.out.println("All players have left. Server will be shutdown.");
+                this.closeAllConnections();
+                System.exit(5);
             }
         }
         else {

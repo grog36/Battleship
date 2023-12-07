@@ -189,10 +189,6 @@ public class Grid {
     private void hitShip(String shipName, ArrayList<Integer> shipList, Integer coordinate) {
         shipList.remove(coordinate);
         this.grid[((int) (coordinate / this.gridSize))][coordinate % this.gridSize] = HIT;
-        System.out.println("You hit a ship.");
-        if (shipList.size() == 0) {
-            System.out.println("You have sunk the enemy's " + shipName + "!");
-        }
     }
 
     //Attempts to shoot a specific coordinate (returns true if valid shot, false otherwise)
@@ -224,45 +220,73 @@ public class Grid {
                 break;
             case WATER:
                 this.grid[rowIndex][columnIndex] = MISS;
-                System.out.println("You missed.");
                 break;
             default:
-                System.out.println("Invalid Coordinate. Please shoot again.");
                 wasValidShot = false;
                 break;
         }
         return wasValidShot;
     }   
 
-    //To string function (displays the grid)
+    //To string function (displays the grid) Very scuffed but works
     public String toString() {
-        String output = "";
+        String output = " ";
         for (int i = 0; i < this.gridSize; i++) {
-            for (int j = 0; j < this.gridSize; j++) {
-                output += "[";
-                output += this.grid[i][j];
-                output += "]";
-            }
-            output += "\n";
+            output += "   ";
+            output += i;
         }
+        for (int j = 0; j < this.gridSize; j++) {
+            output += "\n  ";
+            for (int k = 0; k < this.gridSize; k++) {
+                output += "+---";
+            }
+            output += "+\n";
+            output += j;
+            output += " ";
+            for (int l = 0; l < this.gridSize; l++) {
+                output += "| " + this.grid[j][l] + " ";
+            }
+            output += "|";
+        }
+        output += "\n  ";
+        for (int m = 0; m < this.gridSize; m++) {
+            output += "+---";
+        }
+        output += "+";
         return output;
     }
 
     public String getEnemyPov() {
-        String output = "";
+        String output = " ";
         for (int i = 0; i < this.gridSize; i++) {
-            for (int j = 0; j < this.gridSize; j++) {
-                output += "[";
-                if (this.grid[i][j] == MISS || this.grid[i][j] == HIT) {
-                    output += this.grid[i][j];
+            output += "   ";
+            output += i;
+        }
+        for (int j = 0; j < this.gridSize; j++) {
+            output += "\n  ";
+            for (int k = 0; k < this.gridSize; k++) {
+                output += "+---";
+            }
+            output += "+\n";
+            output += j;
+            output += " ";
+            for (int l = 0; l < this.gridSize; l++) {
+                output += "| ";
+                if (this.grid[j][l] == HIT || this.grid[j][l] == MISS) {
+                    output += this.grid[j][l];
                 }
                 else {
                     output += WATER;
                 }
-                output += "]";
+                output += " ";
             }
-            output += "\n";
+            output += "|";
         }
+        output += "\n  ";
+        for (int m = 0; m < this.gridSize; m++) {
+            output += "+---";
+        }
+        output += "+";
         return output;
     }
     
